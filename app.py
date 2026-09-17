@@ -29,7 +29,7 @@ st.info(
     "case-by-case judgment. Juan Mendez shows more natural, variable review times.\n"
     "- The \"we pre-review, then batch approve\" defense doesn't hold up: even in the largest single "
     "review sessions, the average time spent per case is still only seconds.\n"
-    "- The payout cut from $50 to $17 per approval (June 2020) did not slow Gary Arnold down. His "
+    "- The payout cut from \$50 to \$17 per approval (June 2020) did not slow Gary Arnold down. His "
     "per-case speed didn't significantly change, and he approved significantly more cases per day "
     "afterward, yet his average daily earnings still fell by more than half.\n"
     "- Limitation: this data only records approvals. There is no record of rejected cases, so fast "
@@ -168,12 +168,21 @@ st.pyplot(fig4)
 
 # ---- Top approval days ----
 st.subheader("Top Approval Days")
+st.caption("Each technician's own busiest days, shown separately so the comparison stays fair.")
 
-top_days = filtered_daily.sort_values("approvals", ascending=False).head(10)
-labels = top_days["date"].astype(str) + " (" + top_days["technician"] + ")"
+top_days_per_tech = (
+    filtered_daily.sort_values(["technician", "approvals"], ascending=[True, False])
+    .groupby("technician")
+    .head(3)
+)
+
+labels = top_days_per_tech["date"].astype(str) + " (" + top_days_per_tech["technician"] + ")"
+
+colors = {"Gary Arnold": "steelblue", "Juan Mendez": "darkorange", "Matt Shawn": "seagreen"}
+bar_colors = top_days_per_tech["technician"].map(colors).fillna("gray")
 
 fig2, ax2 = plt.subplots(figsize=(10, 4))
-ax2.bar(labels, top_days["approvals"], color="steelblue")
+ax2.bar(labels, top_days_per_tech["approvals"], color=bar_colors)
 ax2.set_ylabel("Approvals")
 plt.setp(ax2.get_xticklabels(), rotation=45, ha="right")
 st.pyplot(fig2)
@@ -272,7 +281,7 @@ st.caption(
 
 # ---- Did the payout change work? ----
 st.subheader("Did the Payout Change Affect Behavior?")
-st.caption("Only technicians with approvals on both sides of the June 2020 payout change ($50 to $17) can be compared this way.")
+st.caption("Only technicians with approvals on both sides of the June 2020 payout change (\$50 to \$17) can be compared this way.")
 
 for tech in selected_technicians:
     tech_rows = filtered[filtered["technician"] == tech]
@@ -297,7 +306,7 @@ for tech in selected_technicians:
     c1, c2, c3 = st.columns(3)
     c1.metric("Median duration, Before -> After", f"{before.median():.0f}s -> {after.median():.0f}s")
     c2.metric("Avg approvals/day, Before -> After", f"{before_appr.mean():.0f} -> {after_appr.mean():.0f}")
-    c3.metric("Avg revenue/day, Before -> After", f"${before_rev.mean():,.0f} -> ${after_rev.mean():,.0f}")
+    c3.metric("Avg revenue/day, Before -> After", f"\${before_rev.mean():,.0f} -> \${after_rev.mean():,.0f}")
     st.write(
         f"Duration t-test p-value: {p_val:.4f} "
         f"({'no significant change in per-case speed' if p_val >= 0.05 else 'significant change in per-case speed'}). "
