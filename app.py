@@ -50,6 +50,8 @@ if len(date_range) == 2:
     start_date, end_date = date_range
 else:
     start_date, end_date = min_date, max_date
+    
+fast_threshold = 10
 
 # ---- Apply filters ----
 filtered = approvals[
