@@ -51,8 +51,6 @@ if len(date_range) == 2:
 else:
     start_date, end_date = min_date, max_date
 
-fast_threshold = st.sidebar.slider("Fast-approval threshold (seconds)", 1, 60, 10)
-
 # ---- Apply filters ----
 filtered = approvals[
     (approvals["technician"].isin(selected_technicians))
