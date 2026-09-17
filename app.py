@@ -241,6 +241,42 @@ axes3[-1].set_xlabel("Case order within the session")
 plt.tight_layout()
 st.pyplot(fig3)
 
+# ---- Same-second approvals ----
+st.subheader("The Most Extreme Case: Two Approvals in the Same Second")
+st.write(
+    "Approval timestamps are only recorded to the second. A gap of exactly 0 seconds means two "
+    "different cases were logged with the identical second on the clock, the fastest pace this "
+    "data can show."
+)
+
+same_second = filtered[filtered["duration_seconds_clean"] == 0]
+total_same_second = len(same_second)
+
+if total_same_second > 0:
+    mid_session_share = (same_second["new_block"] == False).mean() * 100
+    st.write(
+        f"**{total_same_second}** approval pairs in the current selection were logged in the exact "
+        f"same second, and **{mid_session_share:.0f}%** of those happened in the middle of an "
+        f"already-active review session, not at the start of one."
+    )
+
+    same_second_rows = []
+    for tech in selected_technicians:
+        tech_same_second = same_second[same_second["technician"] == tech]
+        count = len(tech_same_second)
+        mid_pct = (tech_same_second["new_block"] == False).mean() * 100 if count > 0 else float("nan")
+        same_second_rows.append({"technician": tech, "same-second pairs": count, "% mid-session": mid_pct})
+
+    same_second_table = pd.DataFrame(same_second_rows).set_index("technician")
+    st.dataframe(same_second_table.style.format({"% mid-session": "{:.0f}%"}, na_rep="N/A"))
+else:
+    st.write("No same-second approval pairs in the current selection.")
+
+st.caption(
+    "This is a small slice of total approvals, it's an extreme illustration, not the main evidence. "
+    "The median durations and threshold percentages above remain the primary basis for this analysis."
+)
+
 # ---- Incentive magnitude ----
 st.subheader("How Attractive Was It to Move Fast?")
 
